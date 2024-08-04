@@ -1,3 +1,5 @@
+import io.qameta.allure.Description;
+import io.qameta.allure.Step;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -22,7 +24,7 @@ public class MtsByTest {
     public void setUp() {
         System.setProperty("webdriver.chrome.driver", "src/test/resources/chromedriver.exe");
         driver = new ChromeDriver();
-        driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(5));
+        driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(10));
         driver.get("http://mts.by");
         mtsByOnlinePaymentPage = new MtsByOnlinePaymentPage(driver);
 
@@ -109,38 +111,75 @@ public class MtsByTest {
 
     @Test
     @DisplayName("Проверка корректности отображения реквизитов для оплаты в открывшемся окне")
-    public void testIframePaymentDetails() {
+    @Description("Проверяем, что сумма, номер телефона и другие реквизиты корректно отображаются в iframe.")
+    public void testIframePaymentDetailsAllure() {
         mtsByOnlinePaymentPage.fillPaymentForm(Constants.PHONE, Constants.SUM, Constants.EMAIL);
         driver.switchTo().frame(driver.findElement(By.className("bepaid-iframe")));
 
         PaymentDetailsPage paymentDetailsPage = new PaymentDetailsPage(driver);
 
         // Проверка корректности отображения суммы
+        checkPaymentCost(paymentDetailsPage);
+        // Проверка текста на кнопке
+        checkPaymentButtonText(paymentDetailsPage);
+        // Проверка корректности отображения номера телефона
+        checkPhoneDescription(paymentDetailsPage);
+        // Проверка надписей полей ввода реквизитов карты
+        checkCreditCardNumberLabel(paymentDetailsPage);
+        checkExpirationDateLabel(paymentDetailsPage);
+        checkCvcLabel(paymentDetailsPage);
+        checkHolderLabel(paymentDetailsPage);
+        // Проверка количества логотипов платёжных систем
+        checkPaymentLogosCount(paymentDetailsPage);
+    }
+
+    @Step("Проверка корректности отображения суммы")
+    private void checkPaymentCost(PaymentDetailsPage paymentDetailsPage) {
         assertEquals(paymentDetailsPage.formatValue(Constants.SUM) + " BYN",
                 paymentDetailsPage.getPaymentCost(),
                 "Ошибка: Сумма пополнения во фрейме отображается некорректно");
+    }
 
-        // Проверка текста на кнопке
+    @Step("Проверка текста на кнопке")
+    private void checkPaymentButtonText(PaymentDetailsPage paymentDetailsPage) {
         assertEquals("Оплатить " + paymentDetailsPage.formatValue(Constants.SUM) + " BYN",
                 paymentDetailsPage.getPaymentButtonText(),
                 "Ошибка: Сумма пополнения во фрейме на кнопке отображается некорректно");
+    }
 
-        // Проверка номера телефона
+    @Step("Проверка корректности отображения номера телефона")
+    private void checkPhoneDescription(PaymentDetailsPage paymentDetailsPage) {
         assertEquals("Оплата: Услуги связи Номер:375" + Constants.PHONE,
                 paymentDetailsPage.getPhoneDescription(),
                 "Ошибка: Номер телефона во фрейме отображается некорректно");
+    }
 
-        // Проверка надписей полей ввода реквизитов карты
+    @Step("Проверка надписи поля ввода номера карты")
+    private void checkCreditCardNumberLabel(PaymentDetailsPage paymentDetailsPage) {
         assertEquals("Номер карты", paymentDetailsPage.getCreditCardNumberLabel(),
                 "Ошибка: надпись поля ввода номера карты не корректна");
+    }
+
+    @Step("Проверка надписи поля ввода срока действия карты")
+    private void checkExpirationDateLabel(PaymentDetailsPage paymentDetailsPage) {
         assertEquals("Срок действия", paymentDetailsPage.getExpirationDateLabel(),
                 "Ошибка: надпись поля ввода срока действия карты не корректна");
+    }
+
+    @Step("Проверка надписи поля ввода cvc")
+    private void checkCvcLabel(PaymentDetailsPage paymentDetailsPage) {
         assertEquals("CVC", paymentDetailsPage.getCvcLabel(),
                 "Ошибка: надпись поля ввода cvc не корректна");
+    }
+
+    @Step("Проверка надписи поля ввода имени держателя карты")
+    private void checkHolderLabel(PaymentDetailsPage paymentDetailsPage) {
         assertEquals("Имя держателя (как на карте)", paymentDetailsPage.getHolderLabel(),
                 "Ошибка: надпись поля ввода имени держателя карты не корректна");
+    }
 
-        // Проверка количества логотипов платёжных систем
+    @Step("Проверка количества логотипов платёжных систем")
+    private void checkPaymentLogosCount(PaymentDetailsPage paymentDetailsPage) {
         assertEquals(Constants.EXPECTED_PAYMENT_LOGOS_COUNT, paymentDetailsPage.getPaymentLogosCount(),
                 "Ошибка: Логотипы платёжных систем не отображаются корректно");
     }

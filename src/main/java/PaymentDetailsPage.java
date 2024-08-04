@@ -84,7 +84,7 @@ public class PaymentDetailsPage {
     }
 
     public String getPaymentButtonText() {
-        return driver.findElement(paymentButtonLocator).getText();
+        return wait.until(ExpectedConditions.visibilityOfElementLocated(paymentButtonLocator)).getText();
     }
 
     public String getPhoneDescription() {

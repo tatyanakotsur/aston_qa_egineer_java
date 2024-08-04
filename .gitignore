@@ -1,6 +1,7 @@
 .idea/
 AstonQATraining.iml
 /target
+.allure/
 ### IntelliJ IDEA ###
 out/
 !**/src/main/**/out/

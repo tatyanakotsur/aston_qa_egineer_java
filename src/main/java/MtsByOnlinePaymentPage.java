@@ -1,11 +1,15 @@
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
 
+import java.time.Duration;
 import java.util.List;
 
 public class MtsByOnlinePaymentPage {
     private WebDriver driver;
+    private WebDriverWait wait;
     private By cookieAgreeButton = By.id("cookie-agree");
     private By blockTitle = By.xpath("//h2[contains(normalize-space(), 'Онлайн пополнение без комиссии')]");
     private By paymentLogos = By.xpath("//*[@class=\"pay__partners\"]/ul/li/img");
@@ -19,6 +23,7 @@ public class MtsByOnlinePaymentPage {
 
     public MtsByOnlinePaymentPage(WebDriver driver) {
         this.driver = driver;
+        this.wait = new WebDriverWait(driver, Duration.ofSeconds(Constants.EXPECTED_CONDITION_TIMEOUT));
     }
 
     public void closeCookieAgreement() {
@@ -29,7 +34,7 @@ public class MtsByOnlinePaymentPage {
     }
 
     public boolean isBlockTitleDisplayed() {
-        return driver.findElement(blockTitle).isDisplayed();
+        return wait.until(ExpectedConditions.visibilityOfElementLocated(blockTitle)).isDisplayed();
     }
 
     public int getPaymentLogosCount() {
@@ -37,7 +42,7 @@ public class MtsByOnlinePaymentPage {
     }
 
     public void clickMoreInfoLink() {
-        driver.findElement(moreInfoLink).click();
+        wait.until(ExpectedConditions.visibilityOfElementLocated(moreInfoLink)).click();
     }
 
     public void fillPaymentForm(String phone, String sum, String email) {
